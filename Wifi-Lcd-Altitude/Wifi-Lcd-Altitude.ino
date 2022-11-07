@@ -42,7 +42,7 @@ void setup() {
 
 void loop() {
 
-  fsclient.ReadFSData(&SimulatorData) ;
+  fsclient.Read(&SimulatorData) ;
   String Altitude = SimulatorData["PLANE ALTITUDE"];
   lcd.setCursor(0,0);
   lcd.print( "Alt: ");
