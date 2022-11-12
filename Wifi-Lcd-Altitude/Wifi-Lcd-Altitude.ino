@@ -11,53 +11,50 @@ int ListenPort = 0;
 String RequiredOutputs[1] = {"PLANE ALTITUDE"};
 DynamicJsonDocument SimulatorData(100) ;
 
-WiFiClient wifi;//HttpClient client = HttpClient( wifi , HOST_NAME , HOST_PORT);
+WiFiClient wifi;
 FlightSimulator fsclient = FlightSimulator( wifi , HOST_NAME , HOST_PORT );
 LiquidCrystal_I2C lcd(0x27,20,4);
 
+
 void setup() {
+ 
   lcd.init();  
   lcd.backlight();
  
-
   Serial.begin(9600);
-
-  while ( status != WL_CONNECTED) {
-    Serial.print("Connecting to WiFi ");
-    Serial.println( ssid );
-    status = WiFi.begin(ssid, pass);
-  }
-
-  ListenPort = fsclient.Register( RequiredOutputs );
-
-  if( ListenPort > 0 )
-      if( wifi.connect(  HOST_NAME , ListenPort ) )
-      {
-        Serial.print( "Connected to ");
-        Serial.print(HOST_NAME);
-        Serial.print(" port " );
-        Serial.println(ListenPort);
-      }
 }
 
 void loop() {
 
-  fsclient.Read(&SimulatorData) ;
-  String Altitude = SimulatorData["PLANE ALTITUDE"];
-  lcd.setCursor(0,0);
-  lcd.print( "Alt: ");
-  lcd.print( Altitude );
+  if( status == WL_CONNECTED )
+  {   
+    if( !fsclient.connected())
+    {
+      Serial.println( "Registering");
+      ListenPort = fsclient.Register( RequiredOutputs );
+      if( ListenPort > 0 )
+      {
+        wifi.connect(  HOST_NAME , ListenPort );
+        Serial.println( "Connected to host");
+      }
+    }
 
-  delay(1000);
+    if( fsclient.connected())
+    {
+      fsclient.Read(&SimulatorData) ;
+      fsclient.Write(&SimulatorData) ;
+    }
 
-  // if the server's disconnected, stop the client:
-  if (!wifi.connected()) {
-    Serial.println();
-    Serial.println("disconnecting.");
-    wifi.stop();
-
-    // do nothing forevermore:
-    for(;;)
-      ;
+    String Altitude = SimulatorData["PLANE ALTITUDE"];
+    lcd.setCursor(0,0);
+    lcd.print( "Alt:");
+    lcd.print( Altitude );
   }
+  else
+  {
+    delay(5000);
+    status = WiFi.begin(ssid, pass);
+    Serial.println( status);
+  } 
+  delay(1000);
 }

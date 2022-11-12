@@ -51,3 +51,7 @@ Module.symvers
 Mkfile.old
 dkms.conf
 .vs
+/Debug/Arduino.tlog/unsuccessfulbuild
+/Debug/Arduino.tlog/CL.command.1.tlog
+/Debug/Arduino.tlog/Arduino.lastbuildstate
+/Debug/Arduino.log
